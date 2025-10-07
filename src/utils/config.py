@@ -10,6 +10,11 @@ class Settings:
 
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
     LLAMA_API_KEY: str = os.getenv("LLAMA_EXTRACT_KEY")
+
+    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD")
+    NEO4J_URI: str = os.getenv("NEO4J_URI")
+    NEO4J_USER: str = os.getenv("NEO4J_USER")
+
 settings = Settings()
 
 class Paths:
@@ -31,4 +36,6 @@ class Paths:
     TEST_DIR = RAW_DIR / "test.txt"
     PROCESSED_DIR = DATA_DIR / "processed" 
     PRE_PROCESSED_DIR = DATA_DIR / "pre_processed"
+    PROCESSED_F_DIR = PROCESSED_DIR / "processed_book.json"
+    PROCESSED_T_DIR = PROCESSED_DIR / "results.json"
 paths = Paths()

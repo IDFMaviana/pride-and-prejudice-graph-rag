@@ -7,3 +7,4 @@ pgvector
 langchain-postgres
 llama-cloud-services
 pydantic
+neo4j
