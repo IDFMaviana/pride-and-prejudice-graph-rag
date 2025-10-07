@@ -1,0 +1,309 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "scene_id": {
+      "description": "Unique identifier for the scene or interaction use only Chapter as identifier.",
+      "type": "string"
+    },
+    "setting": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The location and time period where the interaction takes place."
+    },
+    "characters": {
+      "description": "List of characters involved in the interaction.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "character_name": {
+            "description": "Name of the character.",
+            "type": "string"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The character's role or function in the scene."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Brief description of the character's personality or appearance."
+          }
+        },
+        "required": [
+          "character_name",
+          "role",
+          "description"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "interaction_summary": {
+      "description": "A brief summary of the interaction between the characters.",
+      "type": "string"
+    },
+    "dialogue_highlights": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "emotional_tone": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Overall emotional tone of the interaction (e.g., tense, humorous, romantic)."
+    },
+    "power_dynamics": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Analysis of the power dynamics between the characters in the scene."
+    },
+    "themes": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "plot_development": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How this interaction contributes to the overall plot development."
+    },
+    "relationship_development": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How this interaction impacts the development of relationships between characters."
+    },
+    "narrative_perspective": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The point of view from which the interaction is narrated (e.g., first-person, third-person)."
+    },
+    "symbolism": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "authorial_style": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Description of the author's writing style in this interaction (e.g., use of irony, satire)."
+    },
+    "historical_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Relevant historical or social context for understanding the interaction."
+    },
+    "reader_response": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Potential reader reactions or interpretations of the interaction."
+    },
+    "unresolved_questions": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "foreshadowing": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Instances of foreshadowing present in the interaction."
+    },
+    "irony": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Instances of irony (situational, dramatic, verbal) present in the interaction."
+    },
+    "moral_implications": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Moral implications or ethical dilemmas raised by the interaction."
+    },
+    "pairwise_relationships": {
+      "anyOf": [
+        {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "character_name_a": {
+                "description": "The name of the first character in the interaction.",
+                "type": "string"
+              },
+              "character_name_b": {
+                "description": "The name of the second character in the interaction.",
+                "type": "string"
+              },
+              "interaction_type": {
+                "description": "The nature of the interaction (e.g., 'Conversation', 'Argument', 'Shared Glance', 'First Meeting', 'Proposal').",
+                "type": "string"
+              },
+              "sentiment_A_to_B": {
+                "description": "The primary sentiment of character_name_a towards character_name_b in this specific interaction (e.g., 'Disdain', 'Admiration', 'Curiosity', 'Anger').",
+                "type": "string"
+              },
+              "sentiment_B_to_A": {
+                "description": "The primary sentiment of character_name_b towards character_name_a in this specific interaction."
+              },
+              "summary": {
+                "description": "A very brief summary of this specific pairwise interaction.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "character_name_a",
+              "character_name_b",
+              "interaction_type",
+              "sentiment_A_to_B",
+              "sentiment_B_to_A",
+              "summary"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "A list of specific one-on-one interactions that occurred within this scene. Focus on direct exchanges or significant moments between two characters."
+    }
+  },
+  "required": [
+    "scene_id",
+    "setting",
+    "characters",
+    "interaction_summary",
+    "dialogue_highlights",
+    "emotional_tone",
+    "power_dynamics",
+    "themes",
+    "plot_development",
+    "relationship_development",
+    "narrative_perspective",
+    "symbolism",
+    "authorial_style",
+    "historical_context",
+    "reader_response",
+    "unresolved_questions",
+    "foreshadowing",
+    "irony",
+    "moral_implications",
+    "pairwise_relationships"
+  ],
+  "type": "object"
+}

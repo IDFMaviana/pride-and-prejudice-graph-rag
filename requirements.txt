@@ -1,0 +1,9 @@
+google-generativeai
+python-dotenv
+langchain
+SQLAlchemy
+psycopg2-binary
+pgvector
+langchain-postgres
+llama-cloud-services
+pydantic

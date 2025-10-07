@@ -1,0 +1,35 @@
+services:
+  # app
+  app:
+    build: .  
+    container_name: graph_rag_app
+    env_file:
+      - .env  
+    depends_on:
+      - neo4j 
+      - db
+    volumes:
+      - ./src:/app/src 
+  # Neo4j database
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j_db
+    ports:
+      - "7474:7474" 
+      - "7687:7687" 
+    volumes:
+      - ./neo4j_data:/data 
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+  #Postgress SQL
+  db:
+    image: ankane/pgvector:latest 
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432" 
+    volumes:
+      - ./vector_db_store:/var/lib/postgresql/data

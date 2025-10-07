@@ -1,0 +1,3 @@
+.env
+neo4j_data/
+vector_db_store/
