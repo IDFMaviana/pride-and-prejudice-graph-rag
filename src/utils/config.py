@@ -8,13 +8,16 @@ load_dotenv(find_dotenv())
 
 class Settings:
 
-    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
+    GOOGLE_API_KEY: str = os.getenv("GEMINI_API_KEY")
     LLAMA_API_KEY: str = os.getenv("LLAMA_EXTRACT_KEY")
 
     NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD")
     NEO4J_URI: str = os.getenv("NEO4J_URI")
     NEO4J_USER: str = os.getenv("NEO4J_USER")
 
+    PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
+    PINECONE_INDEX_NAME: str = os.getenv("PINECONE_INDEX_NAME")
+    
 settings = Settings()
 
 class Paths:
