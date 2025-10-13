@@ -22,7 +22,8 @@ services:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
   #langflow
   langflow:
-      image: langflowai/langflow:latest
+      build: ./langflow_data
+      #image: langflowai/langflow:latest
       container_name: langflow_ui
       ports:
         - "7860:7860" 

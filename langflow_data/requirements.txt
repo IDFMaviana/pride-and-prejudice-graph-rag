@@ -1,0 +1,3 @@
+langchain-neo4j
+langchain-pinecone
+langchain-google-genai
