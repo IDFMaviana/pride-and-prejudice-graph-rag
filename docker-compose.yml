@@ -20,13 +20,3 @@ services:
       - ./neo4j_data:/data 
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
-  #langflow
-  langflow:
-      build: ./langflow_data
-      #image: langflowai/langflow:latest
-      container_name: langflow_ui
-      ports:
-        - "7860:7860" 
-      volumes:
-        - ./langflow_data:/root/.langflow 
-      #command: run --host 0.0.0.0 --port 7860

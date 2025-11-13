@@ -4,7 +4,5 @@ langchain
 llama-cloud-services
 pydantic
 neo4j
-
-pinecone
-langchain-pinecone
-langchain-google-genai
+crewai
+crewai-tools
