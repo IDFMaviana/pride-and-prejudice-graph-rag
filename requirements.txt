@@ -6,3 +6,10 @@ pydantic
 neo4j
 crewai
 crewai-tools
+crewai-tools[mcp]
+mcp
+uvicorn
+fastmcp
+openai
+pinecone
+langchain-google-genai

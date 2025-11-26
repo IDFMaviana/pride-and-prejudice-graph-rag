@@ -1,136 +1,197 @@
-# Pride and Prejudice Graph RAG
+# Pride and Prejudice Graph RAG (Neo4j + Pinecone + CrewAI + MCP)
 
-Este repositório reúne um pipeline completo de GraphRAG para o romance **Pride and Prejudice**. A ideia é extrair cenas e relacionamentos com o Llama Cloud, estruturar os resultados em um grafo Neo4j, criar embeddings ricos para busca semântica em Pinecone e, por fim, orquestrar tudo com agentes CrewAI capazes de responder perguntas sobre a obra.
+This project implements a Graph RAG pipeline over **“Pride and Prejudice”**, combining:
 
-## Visão geral
+- **Neo4j** for modeling character relationships.
+- **Pinecone** for semantic search over scene summaries.
+- **MCP (Model Context Protocol)** to expose these data sources as tools.
+- **CrewAI** to orchestrate multiple specialized agents (graph, semantic, routing, answer).
 
-1. **Preparação do texto**: o livro bruto é dividido capítulo a capítulo.
-2. **Extração semântica**: um agente do Llama Cloud identifica personagens, cenários, temas e relações.
-3. **Bases de conhecimento**:
-   - **Neo4j** guarda os personagens e interações (grafo heterogêneo).
-   - **Pinecone** indexa resumos das cenas como vetores para busca semântica.
-4. **Camada de agentes**: três agentes CrewAI (grafo, semântico e literário) combinam consultas estruturadas e contextuais para responder ao usuário.
+My goal with this repository is to showcase **AI Data Engineering** skills:
+data ingestion, graph modeling, vector indexing, and LLM integration via MCP.
 
-## Principais recursos
+---
 
-- **Pipeline de dados reproduzível** (`src/data`, `src/Llama`, `src/vector_db_loader.py`, `src/graph_db_loader.py`).
-- **Integração com Google Gemini** para embeddings e geração.
-- **Suporte a Docker Compose** para subir aplicação e Neo4j rapidamente.
-- **Notebooks exploratórios** em `notebooks/` para análises ad hoc.
+## Architecture – Overview
 
-## Pré-requisitos
+1. **Book ingestion and processing**
+   - Pre-processing of the “Pride and Prejudice” text.
+   - Extraction of:
+     - scenes,
+     - characters per scene,
+     - pairwise relationships,
+     - rich metadata (emotions, themes, power dynamics, etc.).
+
+2. **Graph Store (Neo4j)**
+   - Script: `src/graph_db_loader.py`
+   - Structure:
+     - Nodes: `(:Character {name, description, roles[...]})`
+     - Relationships:  
+       `(:Character)-[:INTERACTS_IN {chapter, setting, interaction_type, sentiment_A_to_B, sentiment_B_to_A, emotional_tone, power_dynamics, themes, plot_development, summary}]->(:Character)`
+   - Focus: **relational structure** — who interacts with whom, where, how, and with what impact on the plot.
+
+3. **Vector Store (Pinecone)**
+   - Script: `src/vector_db_loader.py`
+   - Each scene becomes a vector from `interaction_summary`, with metadata:
+     - `chapter_id`, `setting`, `themes`, `characters`, `emotional_tone`,
+     - `power_dynamics`, `plot_development`, `relationship_development`,
+     - `authorial_style`, `historical_context`, `irony`, `dialogue_highlights`.
+   - Focus: **rich narrative context** — tone, style, specific moments, and key dialogue.
+
+4. **MCP Server**
+   - File: `src/app_crewai/tools/mcp_server.py`
+   - Exposes MCP tools:
+     - `run_cypher(body: CypherRequest)` → Neo4j (graph queries).
+     - `semantic_pinecone_search(body: SemanticSearchRequest)` → Pinecone (semantic scenes).
+   - Runs over `stdio` and is consumed by the app via `MCPServerAdapter`.
+
+5. **Orchestration via CrewAI**
+   - Files:
+     - `src/app_crewai/config/agents.yaml`
+     - `src/app_crewai/config/tasks.yaml`
+     - `src/app_crewai/crew.py`
+   - The crew is built dynamically from YAML; agents and tasks are not hard-coded.
+
+---
+
+## Agent Architecture
+
+The application uses a multi-agent architecture with intelligent routing:
+
+- `router_agent` – **Question Router**
+  - Classifies each user question into one of:
+    - `graph_only`
+    - `semantic_only`
+    - `graph_and_semantic`
+    - `direct_answer`
+  - Decides when to use Neo4j, Pinecone, both, or none (to reduce cost).
+
+- `graph_agent` – **Neo4j Relationship Specialist**
+  - Uses only the MCP tool `run_cypher`.
+  - Handles questions about:
+    - who interacts with whom,
+    - relationship types,
+    - relationship evolution,
+    - impact on plot and social dynamics.
+
+- `semantic_agent` – **Semantic Scene Retrieval Specialist**
+  - Uses only the MCP tool `semantic_pinecone_search`.
+  - Retrieves relevant scenes (summary + metadata) for:
+    - narrative context,
+    - emotional tone,
+    - authorial style,
+    - specific moments and dialogue.
+
+- `literary_agent` – **Orchestrator and Literary Analyst**
+  - Never calls tools directly.
+  - Reads the router decision + graph/semantic outputs and writes the final answer in 2–4 paragraphs.
+
+Configuration lives in:
+
+- `src/app_crewai/config/agents.yaml`
+- `src/app_crewai/config/tasks.yaml`
+
+`src/app_crewai/crew.py` is responsible for:
+
+- loading agents and tasks from YAML,
+- binding `task -> agent` based on YAML config,
+- attaching MCP tools automatically for tasks that use Neo4j or Pinecone,
+- building the `Crew` and running `kickoff`.
+
+---
+
+## How to Run
+
+### 1. Prerequisites
 
 - Python 3.12+
-- Conta no [Llama Cloud](https://www.llamaindex.ai/) com acesso ao Extract.
-- Chaves para Google Generative AI, Pinecone e Neo4j (self-hosted ou AuraDB).
-- Docker e Docker Compose (opcional, mas recomendado).
-- Arquivo `jane-austen-pride-prejudice.txt` em `src/data/raw/`.
+- Docker (recommended for Neo4j)
+- Accounts and API keys for:
+  - Neo4j (or a local instance),
+  - Pinecone,
+  - OpenAI (or compatible LLM provider, via `OPENAI_MODEL`),
+  - Gemini (for embeddings, if keeping the current setup).
 
-## Configuração rápida
+### 2. Environment Variables
 
-1. Clone o projeto e crie um ambiente virtual.
-   ```bash
-   python -m venv .venv
-   .\.venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-2. Copie o texto original para `src/data/raw/jane-austen-pride-prejudice.txt`.
-3. Crie um arquivo `.env` na raiz com as credenciais abaixo.
+Create a `.env` file, for example:
 
-### Variáveis de ambiente esperadas
+```env
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
 
-| Nome                     | Descrição                                              |
-|-------------------------|--------------------------------------------------------|
-| `GEMINI_API_KEY`        | Chave do Google Generative AI (usada por LLM/embeddings) |
-| `LLAMA_EXTRACT_KEY`     | Chave do Llama Cloud Extract                           |
-| `NEO4J_URI`             | URI do banco (ex.: `bolt://neo4j:7687`)                |
-| `NEO4J_USER` / `NEO4J_PASSWORD` | Credenciais do Neo4j                           |
-| `PINECONE_API_KEY`      | Chave do Pinecone                                      |
-| `PINECONE_INDEX_NAME`   | Nome do índice que será criado/use                    |
+NEO4J_URI=bolt://neo4j:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=...
 
-## Preparando os dados
+PINECONE_API_KEY=...
+PINECONE_INDEX_NAME=pride-prejudice-scenes
 
-1. **Dividir o livro em capítulos**
-   ```bash
-   python src/data/preprocess_chapters.py
-   ```
-   Saída: arquivos `Chapter_X.txt` em `src/data/pre_processed/`.
+GEMINI_API_KEY=...
 
-2. **Rodar o agente de extração**
-   ```bash
-   python src/Llama/agent_extraction.py
-   ```
-   O script envia lotes para o Llama Cloud e consolida os resultados em `src/data/processed/processed_book.json`.
+### 3. Start Neo4j and load the graph
+With Docker Compose, for example:
 
-## Carregar as bases
+bash
 
-1. **Pinecone (vetores)**
-   ```bash
-   python src/vector_db_loader.py
-   ```
-   - Cria o índice (caso não exista) com embeddings Gemini `models/gemini-embedding-001`.
-   - Faz upsert em lotes de 50 cenas.
+docker-compose up neo4j
+Then populate Neo4j:
 
-2. **Neo4j (grafo de personagens)**
-   ```bash
-   python src/graph_db_loader.py
-   ```
-   - Garante a constraint única de personagens.
-   - Cria nós de personagens e relacionamentos `INTERACTS_IN` com atributos de cena.
+bash
 
-## Subindo o ambiente com Docker
+python src/graph_db_loader.py
 
-```bash
-docker compose up --build
-```
+### 4. Populate Pinecone
 
-- Serviço `neo4j` expõe 7474 (Browser) e 7687 (Bolt), persistindo dados em `neo4j_data/`.
-- Serviço `app` carrega o código em `/app/src` com as variáveis definidas no `.env`.
+bash
 
-## Operando os agentes
+python src/vector_db_loader.py
+This creates the index (if needed) and upserts scene vectors.
 
-Com as bases populadas e as variáveis configuradas, execute:
+### 5. Run the interactive app
 
-```bash
-python src/main_agent.py
-```
+bash
 
-O script instancia:
-- **Graph Database Specialist** para Cypher no Neo4j.
-- **Semantic Search Specialist** para busca Pinecone.
-- **Literary Analyst** que coordena as respostas ao usuário.
+python src/main.py
+You should see:
 
-(Os hooks para ferramentas estão prontos, bastando conectar os objetos de consulta dentro do código.)
+text
 
-## Estrutura do repositório
+Type your question about Pride and prejudice:
 
-```
-.
-├── docker-compose.yml / dockerfile
-├── requirements.txt
-├── neo4j_data/                 # volume do banco
-├── notebooks/                  # análises exploratórias
-└── src/
-    ├── data/
-    │   ├── raw/                # texto original
-    │   ├── pre_processed/      # capítulos individuais
-    │   ├── processed/          # JSON final do Llama
-    │   └── preprocess_chapters.py
-    ├── Llama/
-    │   ├── prompts/            # prompt e schema do extractor
-    │   └── agent_extraction.py
-    ├── tools/, utils/
-    ├── graph_db_loader.py
-    ├── vector_db_loader.py
-    └── main_agent.py
-```
+Example questions:
 
-## Próximos passos sugeridos
+“How does Elizabeth Bennet's relationship with Mr. Darcy evolve over the novel?”
+“In which scenes does Lady Catherine influence the power dynamics between characters?”
+“Show key scenes where irony is used to criticize social norms.”
 
-- Conectar de fato os agentes às ferramentas de consulta (Neo4j/Pinecone) e liberar uma interface de chat.
-- Enriquecer o schema do grafo (por exemplo, nós de lugares ou temas).
-- Adicionar testes automatizados para as funções de parsing e loaders.
+--- 
 
-## Licença
+### What This Showcases
+* Graph Modeling (Neo4j)
 
-Distribuído sob a licença [MIT](LICENSE).
+** Design of Character nodes and INTERACTS_IN relationships with rich properties.
+** Idempotent loading with constraints and MERGE operations (graph_db_loader.py).
+** Vector Store Design (Pinecone)
+
+* Thoughtful separation of text vs. metadata fields.
+** Batched embedding and upsert workflow using Gemini (vector_db_loader.py).
+
+* LLM Integration via MCP
+** Exposing Neo4j and Pinecone as reusable MCP tools.
+** Communication over stdio using FastMCP and MCPServerAdapter.
+
+* Multi-agent Orchestration (CrewAI)
+
+** Architecture with a router agent, data specialists, and a synthesis agent.
+** Declarative configuration (YAML) and dynamic binding in the crew runtime.
+
+*Data Engineering Practices
+
+** Clear separation between data layer (Neo4j/Pinecone), MCP layer, and orchestration layer.
+** Docker friendliness and configuration via .env.
+### Future Work
+* Add unit tests for data loading and MCP server behavior.
+* Add basic observability (structured logging for Neo4j/Pinecone queries).
+* Generalize the template to other books or domains, documenting the customization points.
+Feel free to open issues or PRs if you’d like to adapt this template to a different domain or extend the architecture.

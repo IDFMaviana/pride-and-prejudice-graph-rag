@@ -1,0 +1,94 @@
+tasks:
+  route_question:
+    description: >
+      Read the user question and classify it into one of four modes:
+      "graph_only", "semantic_only", "graph_and_semantic", or "direct_answer".
+      Use "graph_only" when the question is mainly about relationships between
+      characters, interaction patterns, who interacts with whom, types of
+      interactions (e.g. conflict, alliance, romance), or how these interactions
+      affect plot development, power dynamics or themes across chapters, which
+      can be answered from the Neo4j graph (Character nodes and INTERACTS_IN
+      relationships with chapter, setting, interaction_type, sentiments,
+      emotional_tone, power_dynamics, themes and plot_development).
+      Use "semantic_only" when the question is mainly about specific scenes,
+      settings, atmosphere, emotional tone, narrative style, irony, important
+      dialogue, or detailed descriptions of events, which can be answered from
+      the Pinecone vector database (scene-level interaction_summary plus
+      metadata such as chapter_id, setting, themes, characters, emotional_tone,
+      power_dynamics, relationship_development, authorial_style, historical_
+      context, irony, dialogue_highlights). Use "graph_and_semantic" when the
+      question clearly needs both structural relationship data and rich scene
+      context. Use "direct_answer" when the question can be answered from
+      general knowledge of the novel without querying any database (for example,
+      high-level themes, author information, or very generic plot questions).
+    expected_output: >
+      A JSON object with a single field "mode" whose value is exactly one of:
+      "graph_only", "semantic_only", "graph_and_semantic", "direct_answer".
+      Do not include explanations, reasoning or any other fields.
+    agent: router_agent
+    async_execution: false
+
+  graph_relationship_extraction:
+     description: >
+      If the router mode is "graph_only" or "graph_and_semantic", use the Neo4j
+      MCP tool `run_cypher` to extract character relationships related to the
+      user's question. The Neo4j graph contains Character nodes and INTERACTS_IN
+      relationships with properties such as chapter, setting, interaction_type,
+      sentiment_A_to_B, sentiment_B_to_A, summary, emotional_tone,
+      power_dynamics, themes and plot_development. Focus on interactions and
+      relationship patterns that clearly help answer the question. If the router
+      mode is "semantic_only" or "direct_answer", do not query Neo4j and return
+      a short note that graph data was skipped.
+     expected_output: >
+       If graph data is requested by the router, return a concise JSON-like list
+       of at most 10 interactions. For each interaction, include: character_a,
+       character_b, chapter, setting, interaction_type, sentiments
+       (sentiment_A_to_B and sentiment_B_to_A), emotional_tone, main_themes,
+       power_dynamics and a 1–2 sentence note on plot_development and any key
+       summary. If graph data was not requested, return the literal string
+       "graph_skipped_by_router".
+     agent: graph_agent
+     async_execution: false
+
+  semantic_scene_retrieval:
+     description: >
+      If the router mode is "semantic_only" or "graph_and_semantic", use the
+      Pinecone MCP tool `semantic_pinecone_search` to retrieve scene-level
+      summaries relevant to the user's question. The Pinecone index contains
+      interaction_summary texts with metadata such as chapter_id, setting,
+      themes, characters, emotional_tone, power_dynamics, plot_development,
+      relationship_development, authorial_style, historical_context, irony and
+      dialogue_highlights. Focus on scenes that provide the richest narrative
+      context to support an answer. If the router mode is "graph_only" or
+      "direct_answer", do not query Pinecone and return a short note that
+      scenes were skipped.
+     expected_output: >
+      If scenes are requested by the router, return a list of at most 5 scenes.
+      For each scene, include: chapter_id, a 2–3 sentence paraphrase of the
+      interaction_summary, key characters involved, main themes, emotional_tone,
+      power_dynamics, relationship_development, and a brief note explaining why
+      this scene is relevant to the user's question (e.g. key event or dialogue).
+      If scenes were not requested, return the literal string
+      "scenes_skipped_by_router".
+     agent: semantic_agent
+     async_execution: false
+
+  literary_answer_synthesis:
+     description: >
+      Read the router mode and the outputs from the graph and semantic tasks and
+      synthesize an answer to the user's question about "Pride and Prejudice".
+      If the mode is "direct_answer", ignore graph and scenes and answer from
+      your knowledge of the novel. If "graph_only", focus on graph evidence.
+      If "semantic_only", focus on scenes. If "graph_and_semantic", combine both.
+      Do NOT call any tools.
+     expected_output: >
+      A well-organized answer in natural language (2–4 short paragraphs) that:
+      directly answers the question; uses graph data and/or scenes according to
+      the router mode; references chapters and key interactions when helpful;
+      and avoids long quotes or unnecessary details.
+     agent: literary_agent
+     async_execution: false
+     context:
+      - route_question
+      - graph_relationship_extraction
+      - semantic_scene_retrieval
