@@ -11,7 +11,7 @@ My goal with this repository is to showcase **AI Data Engineering** skills:
 data ingestion, graph modeling, vector indexing, and LLM integration via MCP.
 
 ---
-img/excalidraw.png
+![alt text](img/excalidraw.png)
 
 ## Architecture – Overview
 
@@ -132,6 +132,7 @@ PINECONE_INDEX_NAME=pride-prejudice-scenes
 GEMINI_API_KEY=...
 
 LLAMA_EXTRACT_KEY=...
+```
 --- 
 ## 3. Start Neo4j and load the graph
 With Docker Compose, for example:
