@@ -11,6 +11,7 @@ My goal with this repository is to showcase **AI Data Engineering** skills:
 data ingestion, graph modeling, vector indexing, and LLM integration via MCP.
 
 ---
+img/excalidraw.png
 
 ## Architecture – Overview
 
@@ -29,7 +30,7 @@ data ingestion, graph modeling, vector indexing, and LLM integration via MCP.
      - Relationships:  
        `(:Character)-[:INTERACTS_IN {chapter, setting, interaction_type, sentiment_A_to_B, sentiment_B_to_A, emotional_tone, power_dynamics, themes, plot_development, summary}]->(:Character)`
    - Focus: **relational structure** — who interacts with whom, where, how, and with what impact on the plot.
-
+    ![alt text](img/graph.png)
 3. **Vector Store (Pinecone)**
    - Script: `src/vector_db_loader.py`
    - Each scene becomes a vector from `interaction_summary`, with metadata:
@@ -37,6 +38,8 @@ data ingestion, graph modeling, vector indexing, and LLM integration via MCP.
      - `power_dynamics`, `plot_development`, `relationship_development`,
      - `authorial_style`, `historical_context`, `irony`, `dialogue_highlights`.
    - Focus: **rich narrative context** — tone, style, specific moments, and key dialogue.
+
+    ![alt text](img/image.png)
 
 4. **MCP Server**
    - File: `src/app_crewai/tools/mcp_server.py`
@@ -113,7 +116,6 @@ Configuration lives in:
   - Gemini (for embeddings, if keeping the current setup).
 
 ### 2. Environment Variables
-
 Create a `.env` file, for example:
 
 ```env
@@ -127,9 +129,11 @@ NEO4J_PASSWORD=...
 PINECONE_API_KEY=...
 PINECONE_INDEX_NAME=pride-prejudice-scenes
 
-GEMINI_API_KEY=...```
+GEMINI_API_KEY=...
 
-### 3. Start Neo4j and load the graph
+LLAMA_EXTRACT_KEY=...
+--- 
+## 3. Start Neo4j and load the graph
 With Docker Compose, for example:
 
 bash
@@ -165,33 +169,36 @@ Example questions:
 “In which scenes does Lady Catherine influence the power dynamics between characters?”
 “Show key scenes where irony is used to criticize social norms.”
 
---- 
+---
 
 ### What This Showcases
-* Graph Modeling (Neo4j)
+- Graph Modeling (Neo4j)
 
-** Design of Character nodes and INTERACTS_IN relationships with rich properties.
-** Idempotent loading with constraints and MERGE operations (graph_db_loader.py).
-** Vector Store Design (Pinecone)
+-- Design of Character nodes and INTERACTS_IN relationships with rich properties.
+-- Idempotent loading with constraints and MERGE operations (graph_db_loader.py).
+-- Vector Store Design (Pinecone)
 
-* Thoughtful separation of text vs. metadata fields.
-** Batched embedding and upsert workflow using Gemini (vector_db_loader.py).
+- Thoughtful separation of text vs. metadata fields.
+-- Batched embedding and upsert workflow using Gemini (vector_db_loader.py).
 
-* LLM Integration via MCP
-** Exposing Neo4j and Pinecone as reusable MCP tools.
-** Communication over stdio using FastMCP and MCPServerAdapter.
+- LLM Integration via MCP
+-- Exposing Neo4j and Pinecone as reusable MCP tools.
+-- Communication over stdio using FastMCP and MCPServerAdapter.
 
-* Multi-agent Orchestration (CrewAI)
+- Multi-agent Orchestration (CrewAI)
 
-** Architecture with a router agent, data specialists, and a synthesis agent.
-** Declarative configuration (YAML) and dynamic binding in the crew runtime.
+-- Architecture with a router agent, data specialists, and a synthesis agent.
+-- Declarative configuration (YAML) and dynamic binding in the crew runtime.
 
-*Data Engineering Practices
+-Data Engineering Practices
 
-** Clear separation between data layer (Neo4j/Pinecone), MCP layer, and orchestration layer.
-** Docker friendliness and configuration via .env.
+-- Clear separation between data layer (Neo4j/Pinecone), MCP layer, and orchestration layer.
+-- Docker friendliness and configuration via .env.
+
 ### Future Work
-* Add unit tests for data loading and MCP server behavior.
-* Add basic observability (structured logging for Neo4j/Pinecone queries).
-* Generalize the template to other books or domains, documenting the customization points.
+
+- Add unit tests for data loading and MCP server behavior.
+- Add basic observability (structured logging for Neo4j/Pinecone queries).
+- Generalize the template to other books or domains, documenting the customization points.
+
 Feel free to open issues or PRs if you’d like to adapt this template to a different domain or extend the architecture.

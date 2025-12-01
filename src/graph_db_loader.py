@@ -95,7 +95,6 @@ def main():
     loader = Neo4jLoader(URI, USER, PASSWORD)
     loader.create_constraints()
 
-    #chapters = load_all_extractions(paths.PROCESSED_F_DIR, True)
     chapters = load_all_extractions(paths.PROCESSED_F_DIR, True)
     
     character_count = 0

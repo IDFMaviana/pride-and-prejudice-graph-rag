@@ -16,7 +16,7 @@ PINECONE_API_KEY = settings.PINECONE_API_KEY
 PINECONE_INDEX_NAME = settings.PINECONE_INDEX_NAME
 GOOGLE_API_KEY = settings.GOOGLE_API_KEY
 
-mcp = FastMCP("Neo4j-pride-graph")
+mcp = FastMCP("mcp-server-pride")
 driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
 
 pc = Pinecone(api_key=PINECONE_API_KEY)

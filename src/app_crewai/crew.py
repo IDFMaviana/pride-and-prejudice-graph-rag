@@ -6,7 +6,7 @@ import yaml
 from crewai import Crew, Process
 from crewai_tools import MCPServerAdapter
 from mcp import StdioServerParameters
-from ..utils.config import paths
+from utils.config import paths
 
 
 from .config_loader import load_agents, load_tasks
