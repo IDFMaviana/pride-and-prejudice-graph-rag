@@ -17,6 +17,8 @@ class Settings:
 
     PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY")
     PINECONE_INDEX_NAME: str = os.getenv("PINECONE_INDEX_NAME")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL")
     
 settings = Settings()
 
@@ -41,4 +43,11 @@ class Paths:
     PRE_PROCESSED_DIR = DATA_DIR / "pre_processed"
     PROCESSED_F_DIR = PROCESSED_DIR / "processed_book.json"
     PROCESSED_T_DIR = PROCESSED_DIR / "results.json"
+
+    #crew
+    CREW_DIR = BASE_DIR/"app_crewai"
+    CREW_CONFIG_DIR = CREW_DIR/"config"
+    TASKS_DIR = CREW_CONFIG_DIR/"tasks.yaml"
+    AGENT_DIR = CREW_CONFIG_DIR/"agents.yaml"
+
 paths = Paths()
