@@ -133,8 +133,8 @@ GEMINI_API_KEY=...
 
 LLAMA_EXTRACT_KEY=...
 ```
---- 
-## 3. Start Neo4j and load the graph
+
+### 3. Start Neo4j and load the graph
 With Docker Compose, for example:
 
 bash
@@ -175,26 +175,24 @@ Example questions:
 ### What This Showcases
 - Graph Modeling (Neo4j)
 
--- Design of Character nodes and INTERACTS_IN relationships with rich properties.
--- Idempotent loading with constraints and MERGE operations (graph_db_loader.py).
--- Vector Store Design (Pinecone)
+  - Design of Character nodes and INTERACTS_IN relationships with rich properties.
+  - Idempotent loading with constraints and MERGE operations (graph_db_loader.py).
 
-- Thoughtful separation of text vs. metadata fields.
--- Batched embedding and upsert workflow using Gemini (vector_db_loader.py).
+- Vector Store Design (Pinecone)
+  - Thoughtful separation of text vs. metadata fields.
+  - Batched embedding and upsert workflow using Gemini (vector_db_loader.py).
 
 - LLM Integration via MCP
--- Exposing Neo4j and Pinecone as reusable MCP tools.
--- Communication over stdio using FastMCP and MCPServerAdapter.
+  - Exposing Neo4j and Pinecone as reusable MCP tools.
+  - Communication over stdio using FastMCP and MCPServerAdapter.
 
 - Multi-agent Orchestration (CrewAI)
+  - Architecture with a router agent, data specialists, and a synthesis agent.
+  - Declarative configuration (YAML) and dynamic binding in the crew runtime.
 
--- Architecture with a router agent, data specialists, and a synthesis agent.
--- Declarative configuration (YAML) and dynamic binding in the crew runtime.
-
--Data Engineering Practices
-
--- Clear separation between data layer (Neo4j/Pinecone), MCP layer, and orchestration layer.
--- Docker friendliness and configuration via .env.
+- Data Engineering Practices
+  - Clear separation between data layer (Neo4j/Pinecone), MCP layer, and orchestration layer.
+  - Docker friendliness and configuration via .env.
 
 ### Future Work
 
